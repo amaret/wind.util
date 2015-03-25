@@ -5,7 +5,7 @@ A simple utility to manage docker containers.
 
 #INSTALL
 
-`pip install wutil`
+`pip install windutil`
 
 then init
 
