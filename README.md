@@ -1,32 +1,21 @@
 Amaret Wind Util
 --------
 
-A command-line utility to manage docker containers comprising the Wind cloud application.
+A simple utility to manage docker containers.
 
-TODO: the command will have options to:
+#INSTALL
 
-1. start all
-2. restart all
-3. stop all
-4. upgrade all
-5. ps (like docker ps -a + top)
+`pip install wutil`
 
-## INSTALL
+then init
 
-during development, you must clone this repo and from within the repo dir run:
+`wutil init`
 
-`sudo pip install -e .`
+Configure your run commands for lists of containers in `~/.wutilrc`.  Use
+the sample one added there by the 'init' command as a template for adding
+your own.
 
-add 'wind' to your /etc/hosts pointing to the ip address of your container
-runner, ie: `boot2docker ip`
+Command documentation is available via:
 
-example:
-
-`192.168.59.103 wind`
-
-## TODO
-
-_If we Open Source enough of the Wind stack so that users can run compiles
-on their own environment, we should merge this tool into the pip pollen
-command._
+`wutil -h`
 
