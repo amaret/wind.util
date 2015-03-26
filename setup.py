@@ -14,7 +14,7 @@ from setuptools import setup
 
 setup(
     name="windutil",
-    version="1.0.0",
+    version="1.0.1",
     install_requires=[
     ],
     entry_points={

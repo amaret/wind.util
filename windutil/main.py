@@ -53,25 +53,36 @@ def _stop(pargs):
 
 def _container_command(command, pargs):
     '''command'''
+    LOG.debug(command + "(ing)")
     for container in pargs.containers:
         from subprocess import call
+        LOG.debug(command + " " + container)
         call(["docker", command, container])
 
 def _run(pargs):
     '''run'''
+    LOG.debug("run(ing)")
     for container in pargs.containers:
+        LOG.debug("run " + container)
         from subprocess import call
         arglist = CONTAINER_INFO[container]['run'].split()
         call(arglist)
 
 def _pull(pargs):
     '''run'''
-    _stop(pargs)
-    _rm(pargs)
+    LOG.debug("pull(ing)")
     for container in pargs.containers:
+        LOG.debug("pull " + container)
         from subprocess import call
         img = CONTAINER_INFO[container]['image']
         call(['docker', 'pull', img])
+
+def _upgrade(pargs):
+    '''upgrade'''
+    _stop(pargs)
+    _rm(pargs)
+    if pargs.local == False:
+        _pull(pargs)
     _run(pargs)
 
 def main():
@@ -95,6 +106,8 @@ def main():
             _rm(pargs)
         if cmd is 'run':
             _run(pargs)
+        if cmd is 'upgrade':
+            _upgrade(pargs)
 
     # pylint: disable=broad-except
     except Exception, ex:
