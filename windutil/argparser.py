@@ -50,6 +50,19 @@ def _config_run(subparsers, parent_parser):
                 "wutil run --help" for parameter help.'
     _config('run', help_str, subparsers, parent_parser)
 
+def _config_upgrade(subparsers, parent_parser):
+    ''' configure upgrade command '''
+    help_str = 'upgrade containers.  Run this command with parameters \
+                indicating what containers you wish to \
+                upgrade (stop, rm, run). \
+                "wutil upgrade --help" for parameter help.'
+    parser = _config('upgrade', help_str, subparsers, parent_parser)
+
+    help_str = 'set if you do not want to pull the latest image from ' \
+               'Docker Hub.'
+    parser.add_argument('-L', '--local', default=False,
+                        action='store_true', help=help_str)
+
 def _config_pull(subparsers, parent_parser):
     ''' configure pull command '''
     help_str = 'Upgrade images.  Run this command with parameters \
@@ -101,6 +114,7 @@ def parse():
     _config_pull(subparsers, parent_parser)
     _config_rm(subparsers, parent_parser)
     _config_run(subparsers, parent_parser)
+    _config_upgrade(subparsers, parent_parser)
     _config_init(subparsers)
     #
     # process args
