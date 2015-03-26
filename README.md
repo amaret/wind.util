@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/amaret/wind.util.svg)](https://travis-ci.org/amaret/wind.util)
+
 Amaret Wind Util
 --------
 
