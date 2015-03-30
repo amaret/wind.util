@@ -85,12 +85,33 @@ def _upgrade(pargs):
         _pull(pargs)
     _run(pargs)
 
+def _ps(pargs):
+    '''ps'''
+    option = '-a'
+    from subprocess import Popen, PIPE
+    process = Popen(["docker", "ps", option], stdout=PIPE)
+    (output, _) = process.communicate()
+    process.wait()
+    import string
+    lines = string.split(output, '\n')
+    status_idx = lines[0].index('STATUS')
+    print lines[0][status_idx:]
+    keys = CONTAINER_INFO.keys()
+    for line in lines[1:]:
+        if len(line) > 0:
+            cname = line[status_idx:].split()[-1]
+            if pargs.all or cname in keys:
+                print line[status_idx:]
+
 def main():
     '''main entry point'''
     try:
         cmd, pargs = parse()
         if cmd is 'init':
             print "Initialized"
+            return
+        if cmd is 'ps':
+            _ps(pargs)
             return
         if pargs.containers and pargs.containers[0] == 'all':
             pargs.containers = CONTAINER_INFO.keys()
