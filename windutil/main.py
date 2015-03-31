@@ -9,13 +9,14 @@ from windutil.scrlogger import ScrLogger
 
 LOG = ScrLogger()
 
-DEFAULT_CONTAINER_INFO={
-    'redis': {
+DEFAULT_CONTAINER_CONFIG=[
+    {
         'name'     : 'redis',
         'priority' : 0,
         'run'      : 'docker run --name wind_redis -p 6379 : 6379 -d redis',
-        'image'    : 'redis'}
-}
+        'image'    : 'redis'
+    }
+]
 
 CONFIG_FILE_PATH = os.path.expanduser('~') + '/.wutilrc'
 def _read_config():
@@ -26,12 +27,12 @@ def _read_config():
         LOG.debug("writing config to %s" % CONFIG_FILE_PATH)
         wutilrc.write(
             json.dumps(
-                DEFAULT_CONTAINER_INFO,
+                DEFAULT_CONTAINER_CONFIG,
                 sort_keys=True,
                 indent=4,
                 separators=(',', ': ')))
         wutilrc.close()
-        return DEFAULT_CONTAINER_INFO
+        return DEFAULT_CONTAINER_CONFIG
 
     LOG.debug("reading config from %s" % CONFIG_FILE_PATH)
     wutilrc = open(CONFIG_FILE_PATH, 'r')
@@ -39,7 +40,15 @@ def _read_config():
     wutilrc.close()
     return json.loads(json_str)
 
-CONTAINER_INFO= _read_config()
+def _load_config():
+    '''store by name for key'''
+    info = {}
+    for cntr in CONTAINER_CONFIG:
+        info[cntr['name']] = cntr
+    return info
+
+CONTAINER_CONFIG = _read_config()
+CONTAINER_INFO= _load_config()
 
 def _rm(pargs):
     '''rm'''
