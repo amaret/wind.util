@@ -9,11 +9,14 @@ from windutil.scrlogger import ScrLogger
 
 LOG = ScrLogger()
 
-DEFAULT_CONTAINER_INFO={
-    'wind_redis': {
-        'run': 'docker run --name wind_redis -p 6379:6379 -d redis',
-        'image': 'redis'}
-}
+DEFAULT_CONTAINER_CONFIG=[
+    {
+        'name'     : 'redis',
+        'priority' : 0,
+        'run'      : 'docker run --name wind_redis -p 6379 : 6379 -d redis',
+        'image'    : 'redis'
+    }
+]
 
 CONFIG_FILE_PATH = os.path.expanduser('~') + '/.wutilrc'
 def _read_config():
@@ -24,12 +27,12 @@ def _read_config():
         LOG.debug("writing config to %s" % CONFIG_FILE_PATH)
         wutilrc.write(
             json.dumps(
-                DEFAULT_CONTAINER_INFO,
+                DEFAULT_CONTAINER_CONFIG,
                 sort_keys=True,
                 indent=4,
                 separators=(',', ': ')))
         wutilrc.close()
-        return DEFAULT_CONTAINER_INFO
+        return DEFAULT_CONTAINER_CONFIG
 
     LOG.debug("reading config from %s" % CONFIG_FILE_PATH)
     wutilrc = open(CONFIG_FILE_PATH, 'r')
@@ -37,7 +40,15 @@ def _read_config():
     wutilrc.close()
     return json.loads(json_str)
 
-CONTAINER_INFO= _read_config()
+def _load_config():
+    '''store by name for key'''
+    info = {}
+    for cntr in CONTAINER_CONFIG:
+        info[cntr['name']] = cntr
+    return info
+
+CONTAINER_CONFIG = _read_config()
+CONTAINER_INFO= _load_config()
 
 def _rm(pargs):
     '''rm'''
@@ -85,6 +96,30 @@ def _upgrade(pargs):
         _pull(pargs)
     _run(pargs)
 
+def _ps(pargs):
+    '''ps'''
+    option = '-a'
+    from subprocess import Popen, PIPE
+    process = Popen(["docker", "ps", option], stdout=PIPE)
+    (output, _) = process.communicate()
+    process.wait()
+    import string
+    lines = string.split(output, '\n')
+    status_idx = lines[0].index('STATUS')
+    print lines[0][status_idx:]
+    keys = CONTAINER_INFO.keys()
+    for line in lines[1:]:
+        if len(line) > 0:
+            cname = line[status_idx:].split()[-1]
+            if pargs.all or cname in keys:
+                print line[status_idx:]
+
+def _sorted_config_names():
+    '''manage dependencies'''
+    newlist = sorted(CONTAINER_INFO.values(), key=lambda x: x['priority'],
+                     reverse=False)
+    return [x['name'] for x in newlist]
+
 def main():
     '''main entry point'''
     try:
@@ -92,8 +127,11 @@ def main():
         if cmd is 'init':
             print "Initialized"
             return
+        if cmd is 'ps':
+            _ps(pargs)
+            return
         if pargs.containers and pargs.containers[0] == 'all':
-            pargs.containers = CONTAINER_INFO.keys()
+            pargs.containers = _sorted_config_names()
         if cmd is 'start':
             _start(pargs)
         if cmd is 'stop':

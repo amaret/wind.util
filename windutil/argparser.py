@@ -81,6 +81,20 @@ def _config_init(subparsers):
         return 'init', parg
     parser.set_defaults(func=up_fun)
 
+
+def _config_ps(subparsers):
+    ''' configure ps command '''
+    help_str = 'Get a terse view of statuses of running containers ' \
+               'configured in your ~/.wutilrc file'
+    parser = subparsers.add_parser('ps', help=help_str)
+    def up_fun(parg):
+        '''fun'''
+        return 'ps', parg
+    parser.set_defaults(func=up_fun)
+    help_str = 'show ALL containers, not just ~/.wutilrc configured ones.'
+    parser.add_argument('-a', '--all', default=False,
+                        action='store_true', help=help_str)
+
 def _config(command, help_str, subparsers, parent_parser):
     ''' configure command '''
     parser = subparsers.add_parser(command, help=help_str,
@@ -116,6 +130,7 @@ def parse():
     _config_run(subparsers, parent_parser)
     _config_upgrade(subparsers, parent_parser)
     _config_init(subparsers)
+    _config_ps(subparsers)
     #
     # process args
     #
