@@ -10,9 +10,11 @@ from windutil.scrlogger import ScrLogger
 LOG = ScrLogger()
 
 DEFAULT_CONTAINER_INFO={
-    'wind_redis': {
-        'run': 'docker run --name wind_redis -p 6379:6379 -d redis',
-        'image': 'redis'}
+    'redis': {
+        'name'     : 'redis',
+        'priority' : 0,
+        'run'      : 'docker run --name wind_redis -p 6379 : 6379 -d redis',
+        'image'    : 'redis'}
 }
 
 CONFIG_FILE_PATH = os.path.expanduser('~') + '/.wutilrc'
@@ -103,6 +105,12 @@ def _ps(pargs):
             if pargs.all or cname in keys:
                 print line[status_idx:]
 
+def _sorted_config_names():
+    '''manage dependencies'''
+    newlist = sorted(CONTAINER_INFO.values(), key=lambda x: x['priority'],
+                     reverse=False)
+    return [x['name'] for x in newlist]
+
 def main():
     '''main entry point'''
     try:
@@ -114,7 +122,7 @@ def main():
             _ps(pargs)
             return
         if pargs.containers and pargs.containers[0] == 'all':
-            pargs.containers = CONTAINER_INFO.keys()
+            pargs.containers = _sorted_config_names()
         if cmd is 'start':
             _start(pargs)
         if cmd is 'stop':
