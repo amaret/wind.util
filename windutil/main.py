@@ -124,18 +124,17 @@ def main():
     '''main entry point'''
     try:
         cmd, pargs = parse()
+        use_all = 'containers' in pargs and pargs.containers[0] == 'all'
         if cmd is 'init':
             print "Initialized"
             return
         if cmd is 'ps':
             _ps(pargs)
             return
-        if pargs.containers and pargs.containers[0] == 'all':
+        if use_all:
             pargs.containers = _sorted_config_names()
         if cmd is 'start':
             _start(pargs)
-        if cmd is 'stop':
-            _stop(pargs)
         if cmd is 'login':
             print "login command"
         if cmd is 'pull':
@@ -144,6 +143,10 @@ def main():
             _rm(pargs)
         if cmd is 'run':
             _run(pargs)
+        if use_all:
+            pargs.containers = reversed(pargs.containers)
+        if cmd is 'stop':
+            _stop(pargs)
         if cmd is 'upgrade':
             _upgrade(pargs)
 
