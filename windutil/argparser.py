@@ -71,6 +71,15 @@ def _config_pull(subparsers, parent_parser):
                 "wutil pull --help" for parameter help.'
     _config('pull', help_str, subparsers, parent_parser)
 
+def _config_untagged(subparsers):
+    ''' configure untagged command '''
+    help_str = 'rmi all orphans.'
+    parser = subparsers.add_parser('untagged', help=help_str)
+    def up_fun(parg):
+        '''fun'''
+        return 'untagged', parg
+    parser.set_defaults(func=up_fun)
+
 def _config_init(subparsers):
     ''' configure init command '''
     help_str = 'Initialize the ~/.wutilrc file.  Use this command ' \
@@ -80,7 +89,6 @@ def _config_init(subparsers):
         '''fun'''
         return 'init', parg
     parser.set_defaults(func=up_fun)
-
 
 def _config_ps(subparsers):
     ''' configure ps command '''
@@ -130,6 +138,7 @@ def parse():
     _config_run(subparsers, parent_parser)
     _config_upgrade(subparsers, parent_parser)
     _config_init(subparsers)
+    _config_untagged(subparsers)
     _config_ps(subparsers)
     #
     # process args

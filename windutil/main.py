@@ -3,6 +3,7 @@
 
 import os
 import json
+from subprocess import call
 # pylint: disable=bad-whitespace
 from windutil.argparser import parse
 from windutil.scrlogger import ScrLogger
@@ -52,39 +53,56 @@ CONTAINER_INFO= _load_config()
 
 def _rm(pargs):
     '''rm'''
-    _container_command('rm', pargs)
+    if pargs.use_all:
+        _container_command('rm', _sorted_config_names())
+    else:
+        _container_command('rm', pargs.containers)
 
 def _start(pargs):
     '''start'''
-    _container_command('start', pargs)
+    if pargs.use_all:
+        _container_command('start', _sorted_config_names())
+    else:
+        _container_command('start', pargs.containers)
+
 
 def _stop(pargs):
     '''stop'''
-    _container_command('stop', pargs)
+    if pargs.use_all:
+        _container_command('stop', _reversed_config_names())
+    else:
+        _container_command('stop', pargs.containers)
 
-def _container_command(command, pargs):
+def _container_command(command, names):
     '''command'''
-    LOG.debug(command + "(ing)")
-    for container in pargs.containers:
-        from subprocess import call
+    LOG.debug(command + "(ing) ")
+    for container in names:
         LOG.debug(command + " " + container)
         call(["docker", command, container])
 
 def _run(pargs):
     '''run'''
     LOG.debug("run(ing)")
-    for container in pargs.containers:
+    names = []
+    if pargs.use_all:
+        names = _sorted_config_names()
+    else:
+        names = pargs.containers
+    for container in names:
         LOG.debug("run " + container)
-        from subprocess import call
         arglist = CONTAINER_INFO[container]['run'].split()
         call(arglist)
 
 def _pull(pargs):
     '''run'''
     LOG.debug("pull(ing)")
-    for container in pargs.containers:
+    names = []
+    if pargs.use_all:
+        names = _sorted_config_names()
+    else:
+        names = pargs.containers
+    for container in names:
         LOG.debug("pull " + container)
-        from subprocess import call
         img = CONTAINER_INFO[container]['image']
         call(['docker', 'pull', img])
 
@@ -114,6 +132,10 @@ def _ps(pargs):
             if pargs.all or cname in keys:
                 print line[status_idx:]
 
+def _reversed_config_names():
+    '''reverse list'''
+    return [x for x in reversed(_sorted_config_names())]
+
 def _sorted_config_names():
     '''manage dependencies'''
     newlist = sorted(CONTAINER_INFO.values(), key=lambda x: x['priority'],
@@ -122,17 +144,16 @@ def _sorted_config_names():
 
 def main():
     '''main entry point'''
+    # pylint: disable=too-many-branches
     try:
         cmd, pargs = parse()
-        use_all = 'containers' in pargs and pargs.containers[0] == 'all'
+        pargs.use_all = 'containers' in pargs and pargs.containers[0] == 'all'
         if cmd is 'init':
             print "Initialized"
             return
         if cmd is 'ps':
             _ps(pargs)
             return
-        if use_all:
-            pargs.containers = _sorted_config_names()
         if cmd is 'start':
             _start(pargs)
         if cmd is 'login':
@@ -143,8 +164,6 @@ def main():
             _rm(pargs)
         if cmd is 'run':
             _run(pargs)
-        if use_all:
-            pargs.containers = reversed(pargs.containers)
         if cmd is 'stop':
             _stop(pargs)
         if cmd is 'upgrade':
