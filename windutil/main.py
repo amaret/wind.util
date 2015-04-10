@@ -2,6 +2,7 @@
 ''' Wind Docker Container Util '''
 
 import os
+import time
 import json
 from subprocess import call
 # pylint: disable=bad-whitespace
@@ -92,6 +93,11 @@ def _run(pargs):
         LOG.debug("run " + container)
         arglist = CONTAINER_INFO[container]['run'].split()
         call(arglist)
+        if 'delay' in CONTAINER_INFO[container]:
+            secs = CONTAINER_INFO[container]['delay']
+            LOG.debug("sleeping %s seconds" % (secs))
+            time.sleep(secs)
+            LOG.debug("done sleeping %s seconds" % (secs))
 
 def _pull(pargs):
     '''run'''
