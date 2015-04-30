@@ -14,7 +14,7 @@ from setuptools import setup
 
 setup(
     name="windutil",
-    version="1.0.6",
+    version="1.0.8",
     install_requires=[
     ],
     entry_points={
@@ -25,7 +25,7 @@ setup(
     packages=['windutil'],
     author="Amaret, Inc",
     author_email="develop@amaret.com",
-    description=("A command-line utility to manage the docker containers " \
+    description=("A command-line utility to manage the docker containers "
                  "of the Wind application."),
     license="APACHE2",
     keywords="python docker",
@@ -42,4 +42,3 @@ setup(
         'Programming Language :: Python :: 2.7'
     ],
 )
-

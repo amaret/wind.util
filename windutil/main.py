@@ -5,22 +5,23 @@ import os
 import time
 import json
 from subprocess import call
-# pylint: disable=bad-whitespace
 from windutil.argparser import parse
 from windutil.scrlogger import ScrLogger
 
 LOG = ScrLogger()
 
-DEFAULT_CONTAINER_CONFIG=[
+DEFAULT_CONTAINER_CONFIG = [
     {
-        'name'     : 'redis',
-        'priority' : 0,
-        'run'      : 'docker run --name wind_redis -p 6379 : 6379 -d redis',
-        'image'    : 'redis'
+        'name': 'redis',
+        'priority': 0,
+        'run': 'docker run --name redis -p 6379:6379 -d redis',
+        'image': 'redis'
     }
 ]
 
 CONFIG_FILE_PATH = os.path.expanduser('~') + '/.wutilrc'
+
+
 def _read_config():
     ''' look up config, if not found init '''
     rcfile = os.path.expanduser('~') + '/.wutilrc'
@@ -42,6 +43,7 @@ def _read_config():
     wutilrc.close()
     return json.loads(json_str)
 
+
 def _load_config():
     '''store by name for key'''
     info = {}
@@ -50,7 +52,8 @@ def _load_config():
     return info
 
 CONTAINER_CONFIG = _read_config()
-CONTAINER_INFO= _load_config()
+CONTAINER_INFO = _load_config()
+
 
 def _rm(pargs):
     '''rm'''
@@ -58,6 +61,7 @@ def _rm(pargs):
         _container_command('rm', _sorted_config_names())
     else:
         _container_command('rm', pargs.containers)
+
 
 def _start(pargs):
     '''start'''
@@ -74,12 +78,18 @@ def _stop(pargs):
     else:
         _container_command('stop', pargs.containers)
 
+
 def _container_command(command, names):
     '''command'''
     LOG.debug(command + "(ing) ")
     for container in names:
         LOG.debug(command + " " + container)
         call(["docker", command, container])
+        if 'delay' in CONTAINER_INFO[container]:
+            secs = CONTAINER_INFO[container]['delay']
+            LOG.debug("sleeping %s seconds" % (secs))
+            time.sleep(secs)
+
 
 def _run(pargs):
     '''run'''
@@ -97,7 +107,7 @@ def _run(pargs):
             secs = CONTAINER_INFO[container]['delay']
             LOG.debug("sleeping %s seconds" % (secs))
             time.sleep(secs)
-            LOG.debug("done sleeping %s seconds" % (secs))
+
 
 def _pull(pargs):
     '''run'''
@@ -112,13 +122,15 @@ def _pull(pargs):
         img = CONTAINER_INFO[container]['image']
         call(['docker', 'pull', img])
 
+
 def _upgrade(pargs):
     '''upgrade'''
+    if pargs.local is False:
+        _pull(pargs)
     _stop(pargs)
     _rm(pargs)
-    if pargs.local == False:
-        _pull(pargs)
     _run(pargs)
+
 
 def _ps(pargs):
     '''ps'''
@@ -138,15 +150,18 @@ def _ps(pargs):
             if pargs.all or cname in keys:
                 print line[status_idx:]
 
+
 def _reversed_config_names():
     '''reverse list'''
     return [x for x in reversed(_sorted_config_names())]
+
 
 def _sorted_config_names():
     '''manage dependencies'''
     newlist = sorted(CONTAINER_INFO.values(), key=lambda x: x['priority'],
                      reverse=False)
     return [x['name'] for x in newlist]
+
 
 def main():
     '''main entry point'''
@@ -181,4 +196,3 @@ def main():
         import traceback
         trace = traceback.format_exc()
         LOG.trace(trace)
-
