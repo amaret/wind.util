@@ -14,7 +14,7 @@ DEFAULT_CONTAINER_CONFIG = [
     {
         'name': 'redis',
         'priority': 0,
-        'run': 'docker run --name wind_redis -p 6379 : 6379 -d redis',
+        'run': 'docker run --name redis -p 6379:6379 -d redis',
         'image': 'redis'
     }
 ]
